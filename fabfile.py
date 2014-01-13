@@ -1,5 +1,6 @@
-from fabric.api import env, cd, sudo, prefix
+from fabric.api import env, task, cd, sudo, prefix
 from fabric.contrib.files import exists
+import os
 
 VIRTUALENV = '/virtualenv'
 ENV = '/env'
@@ -14,14 +15,19 @@ class InstallException(Exception):
     pass
 
 env.hosts = []
-env.path = cwd()
+env.path = os.path.dirname(os.path.realpath(__file__))
 
+@task
+def localhost():
+    env.hosts = ['localhost']
+
+@task
 def install():
     get_source()
     install_deps()
     setup_apache()
 
-
+@task
 def get_source():
     # set up directory for env on fresh server
     if not exists(ENV, use_sudo=True):
@@ -34,7 +40,7 @@ def get_source():
         with cd(REPO):
             sudo('git pull ' + GIT_API_URL)
             sudo('git pull ' + GIT_MODEL_URL)
-
+@task
 def install_deps(): 
     # set up directory for virtualenv
     if not exists(VIRTUALENV, use_sudo=True):
